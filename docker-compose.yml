@@ -1,0 +1,79 @@
+version: '3.8'
+
+
+#networks:
+#  mongo_network:
+#    ipam:
+#      driver: default
+#      config:
+#        - subnet: "172.16.238.0/24"
+
+
+
+services:
+
+  mongo:
+    container_name: mongo
+    image: mongo:latest
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    ports:
+      - 27017:27017
+    restart: always
+
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: "rabbitmq:3-management"
+    command: rabbitmq-server
+    restart: always
+    healthcheck:
+      test: [ "CMD", "rabbitmqctl", "status"]
+      interval: 5s
+      timeout: 15s
+      retries: 1
+    ports:
+      - 15672:15672
+      - 8003:5672
+
+  binance:
+    container_name: service2
+    build:
+      context: .
+      dockerfile: ./binance/Dockerfile
+    volumes:
+      - .:/app/
+    restart: always
+    ports:
+      - 8000:8000
+    command: |
+      /usr/bin/env sh -c "/usr/local/bin/wait-for.sh rabbitmq:5672 --
+      python -m binance"
+    depends_on:
+      - rabbitmq
+      - mongo
+    environment:
+      - PYTHONPATH=/app/
+      - PYTHONUNBUFFERED=1
+
+  dashboard:
+    container_name: service1
+    build:
+      context: .
+      dockerfile: ./dashboard/Dockerfile
+    volumes:
+      - .:/app/
+    restart: always
+    ports:
+      - 8080:8080
+    command: |
+      /usr/bin/env sh -c "/usr/local/bin/wait-for.sh rabbitmq:5672 --
+        python -m dashboard"
+    depends_on:
+      - rabbitmq
+      - mongo
+      - binance
+    environment:
+      - PYTHONPATH=/app/
+      - PYTHONUNBUFFERED=1

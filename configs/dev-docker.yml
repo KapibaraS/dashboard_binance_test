@@ -1,0 +1,8 @@
+mongodb:
+  dsn: mongodb://root:example@mongo:27017/
+  db_name: orderBooks
+debug: true
+RMQ_CONN_STR: amqp://guest:guest@rabbitmq/
+RMQ_CHANNEL_NAME: order_book
+REST_URL_BINANCE: https://api.binance.com/api/v3/depth
+STREAM_URL_URL_BINANCE: wss://stream.binance.com:9443
