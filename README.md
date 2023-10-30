@@ -50,7 +50,7 @@ python -m dashboard
 
 Rest API:
 
-Базовый урл: https://api.example.com
+Базовый урл: https://localhost:8080
     
 Методи запита
 * GET /  
